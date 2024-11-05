@@ -28,7 +28,7 @@
     "**/__pycache__": true,
     "**/__init__.py": true,
     "poetry.toml": true,
-    "**/.*": false,
+    "**/.*": true,
   },
   "python.testing.pytestArgs": [
     "tests"

@@ -26,7 +26,7 @@ classifiers = [
 keywords = ["Game", "Mojette"]
 repository = "https://github.com/leclerc-leo/No-Three-in-Line-Games"
 packages = [
-    {include = "pas_3_alignes", from = "src"},
+    {include = "game", from = "src"},
     {include = "tests"},
 ]
 
