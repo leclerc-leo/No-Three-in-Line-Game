@@ -1,0 +1,59 @@
+
+{
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "always",
+        "source.organizeImports.ruff": "always"
+    }
+  },
+  "python.defaultInterpreterPath": "./.venv/bin/python",
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "mypy.enabled": true,
+  "mypy.runUsingActiveInterpreter": true,
+  "python.analysis.typeCheckingMode": "standard",
+  "files.exclude": {
+    "LICENSE": true,
+    "poetry.lock": true,
+    "**/__py**": true,
+    "setup.py": true,
+    "sonar-project.properties": true,
+    "*.xml": true,
+    "Makefile": true,
+    "pyproject.toml": true,
+    "**/py.typed": true,
+    "mkdocs.yml": true,
+    "**/__pycache__": true,
+    "**/__init__.py": true,
+    "poetry.toml": true,
+    "**/.*": false,
+  },
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.analysis.enablePytestSupport": true,
+  "python.analysis.supportRestructuredText": true,
+  "python.analysis.autoImportCompletions": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.ruff": "always",
+    "source.fixAll.ruff": "always",
+    "source.unusedImports": "never"
+  },
+  "testing.openTesting": "neverOpen",
+  "debug.openDebug": "neverOpen",
+  "sonarlint.connectedMode.project": {
+    "connectionId": "https-sonar-leclerc-dev-",
+    "projectKey": "pas_3_alignes"
+  },
+  "sonarlint.analysisExcludesStandalone": "**/vendor/**",
+  "sonarlint.testFilePattern": "test_*.py",
+  "sonarlint.analyzerProperties": {
+    "sonar.python.coverage.reportPaths": "coverage.xml"
+  },
+  "editor.rulers": [
+    80,
+    100,
+  ]
+}
