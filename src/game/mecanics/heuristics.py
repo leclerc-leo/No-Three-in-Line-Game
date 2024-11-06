@@ -19,19 +19,23 @@ def _level_one(
 
 def _level_two(
     grid: Grid,
-    player_id: int,  # - For better heuristics
-    played: set[tuple[int, int]],  # - For better heuristics
+    player_id: int,
+    player_played: set[tuple[int, int]],
 ) -> tuple[int, int]:
 
     empties = grid.get_empty_positions()
-    played = grid.get_played_positions()
+    all_played = grid.get_played_positions()
 
     # find all columns and rows with 2 points
     columns = {
-        e for e, c in collections.Counter(y for _, y in played).items() if c == 2  # noqa: PLR2004
+        e
+        for e, c in collections.Counter(y for _, y in all_played).items()
+        if c == 2  # noqa: PLR2004
     }
     rows = {
-        e for e, c in collections.Counter(x for x, _ in played).items() if c == 2  # noqa: PLR2004
+        e
+        for e, c in collections.Counter(x for x, _ in all_played).items()
+        if c == 2  # noqa: PLR2004
     }
 
     # we then remove all the empty positions that are in these columns and rows
@@ -39,7 +43,9 @@ def _level_two(
     filtered -= {e for e in empties if e[0] in rows or e[1] in columns}
 
     # if there are no empty positions left, we fallback to the previous heuristic
-    return secrets.choice(tuple(filtered)) if filtered else _level_one(grid, player_id, played)
+    return (
+        secrets.choice(tuple(filtered)) if filtered else _level_one(grid, player_id, player_played)
+    )
 
 
 _int_to_func: dict[int, Callable[[Grid, int, set[tuple[int, int]]], tuple[int, int]]] = {
