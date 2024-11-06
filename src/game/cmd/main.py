@@ -1,6 +1,6 @@
 import pathlib
 
-from game.convexe import grid
+from game.convex import grid
 from game.mecanics import rules
 
 
@@ -12,7 +12,7 @@ def main() -> int:
     output_dir.mkdir(exist_ok=True)
 
     g = grid.Grid(
-        {
+        [
             (1, 0),
             (1, 1),
             (2, 1),
@@ -21,13 +21,13 @@ def main() -> int:
             (0, 1),
             (1, 2),
             (-1, 2),
-        },
+        ],
     )
 
     g.display(output_dir)
 
-    # pour simplifier les tests, j'utilise une matrice
-    # qu'ensuite je convertis vers les positions avec les valeurs True
+    # To make it easier, we indicate position with a matrix of True/False
+    # where True means a position is played
     played_matrix = [
         [False, True, False, False, True, False],
         [True, False, False, False, False, True],

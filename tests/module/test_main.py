@@ -2,4 +2,4 @@ from game.cmd import main
 
 
 def test_main() -> None:
-    main.main()
+    assert main.main() == 0

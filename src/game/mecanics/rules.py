@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import functools
 import itertools
 
+# _is_on_same_line and get_three_in_line are inspied by the following code:
+# Inspired by https://github.com/vjdad4m/no3inline/blob/main/no3inline/find_3_in_line.cu
 
-# @functools.lru_cache(maxsize=None)
+
+@functools.lru_cache(maxsize=None)
 def _is_on_same_line(
     x: tuple[int, int],
     y: tuple[int, int],
@@ -14,24 +18,21 @@ def _is_on_same_line(
 
 
 def get_three_in_line(
-    # Possible d'optimiser en utilisant la carte principalement grace aux bords
     played: set[tuple[int, int]],
     board: set[tuple[int, int]] | None = None,
-    n: int = 3,
 ) -> list[tuple[tuple[int, int], ...]]:
 
+    # Maybe possible to use the board to optimize the function
     board = board or set()
 
     results: list[tuple[tuple[int, int], ...]] = []
 
     # Use set to ensure unique combinations of 3 points
-    for comb in set(itertools.combinations(played, n)):
+    for comb in set(itertools.combinations(played, 3)):
 
         # Check if these three points are on the same line
         if _is_on_same_line(*comb):
 
-            results.append(comb)  # noqa: PERF401 - plus comprehensible
-
-    # Convert results to an array if there are results, otherwise return an empty array
+            results.append(comb)  # noqa: PERF401
 
     return results
