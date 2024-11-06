@@ -10,8 +10,8 @@ if TYPE_CHECKING:
 
 def _level_one(
     grid: Grid,
-    player_id: int,  # noqa: ARG001 - For better heuristics
-    played: set[tuple[int, int]],  # noqa: ARG001 - For better heuristics
+    _player_id: int,
+    _player_played: set[tuple[int, int]],
 ) -> tuple[int, int]:
 
     return secrets.choice(tuple(grid.get_empty_positions()))
