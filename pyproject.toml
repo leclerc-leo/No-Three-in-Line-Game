@@ -92,7 +92,6 @@ line-length = 100
 [tool.coverage.run]
 # Use source_pkgs instead of include to also list uncovered files
 source_pkgs = ["game"]
-source = ["game"]
 omit = [
     "tests/*",
     "venv/*",
