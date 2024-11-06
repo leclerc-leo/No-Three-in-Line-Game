@@ -5,14 +5,14 @@ def test_no_instructions() -> None:
 
     g = grid.Grid([])
 
-    assert g.g == {(0, 0)}
+    assert g.g == {(0, 0): 0}
 
 
 def test_one_instruction() -> None:
 
     g = grid.Grid([(1, 0)])
 
-    assert g.g == {(0, 0), (1, 0)}
+    assert g.g == {(0, 0): 0, (1, 0): 0}
 
 
 def test_multiples_instructions() -> None:
@@ -26,7 +26,7 @@ def test_multiples_instructions() -> None:
         ],
     )
 
-    assert g.g == {(x, y) for x in range(3) for y in range(4)}
+    assert g.g == {(x, y): 0 for x in range(3) for y in range(4)}
 
 
 def test_associativity() -> None:

@@ -55,5 +55,6 @@
   "editor.rulers": [
     80,
     100,
-  ]
+  ],
+  "coverage-gutters.coverageReportFileName": "coverage.xml",
 }

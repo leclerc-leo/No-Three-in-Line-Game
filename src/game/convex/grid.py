@@ -58,7 +58,35 @@ class Grid:
         self: Grid,
         instructions: list[tuple[int, int]],
     ) -> None:
-        self.g = _create(instructions)
+
+        self.g = {e: 0 for e in _create(instructions)}
+
+        self.empties = set(self.g.keys())
+        self.played: set[tuple[int, int]] = set()
+
+    def get_empty_positions(
+        self: Grid,
+    ) -> set[tuple[int, int]]:
+
+        return self.empties
+
+    def get_played_positions(
+        self: Grid,
+    ) -> set[tuple[int, int]]:
+
+        return self.played
+
+    def play(
+        self: Grid,
+        x: int,
+        y: int,
+        player_id: int,
+    ) -> None:
+
+        self.g[(x, y)] = player_id
+
+        self.empties.remove((x, y))
+        self.played.add((x, y))
 
     def display(
         self: Grid,
@@ -72,6 +100,6 @@ class Grid:
             plt.gca().add_patch(matplotlib.patches.Rectangle((x, y), 1, 1, fill=None))
 
         # zip(*self.g) is a tuple of two lists (x, y)
-        plt.scatter(*zip(*self.g))  # type: ignore[arg-type]
+        plt.scatter(*zip(*self.g.keys()))  # type: ignore[arg-type]
 
         plt.savefig(folder / "grid.png")
