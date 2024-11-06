@@ -27,6 +27,7 @@ def _level_two(
     all_played = grid.get_played_positions()
 
     # find all columns and rows with 2 points
+    # above 2 is not possible since 3 points in a row would lose
     columns = {
         e
         for e, c in collections.Counter(y for _, y in all_played).items()
