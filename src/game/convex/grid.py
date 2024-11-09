@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import matplotlib.figure
 import matplotlib.patches
 import matplotlib.pyplot as plt
 
@@ -59,31 +60,27 @@ class Grid:
         instructions: list[tuple[int, int]],
     ) -> None:
 
-        self.g = {e: 0 for e in _create(instructions)}
+        self.board = _create(instructions)
 
-        self.empties = set(self.g.keys())
+        self.width = max(x for x, _ in self.board) + 1
+        self.height = max(y for _, y in self.board) + 1
+
+        self.empties = self.board.copy()
         self.played: set[tuple[int, int]] = set()
-
-    def get_empty_positions(
-        self: Grid,
-    ) -> set[tuple[int, int]]:
-
-        return self.empties
-
-    def get_played_positions(
-        self: Grid,
-    ) -> set[tuple[int, int]]:
-
-        return self.played
 
     def play(
         self: Grid,
         x: int,
         y: int,
-        player_id: int,
     ) -> None:
 
-        self.g[(x, y)] = player_id
+        if (x, y) not in self.board:
+            msg = f"Position {(x, y)} is out of the board."
+            raise ValueError(msg)
+
+        if (x, y) in self.played:
+            msg = f"Position {(x, y)} is already played."
+            raise ValueError(msg)
 
         self.empties.remove((x, y))
         self.played.add((x, y))
@@ -91,15 +88,59 @@ class Grid:
     def display(
         self: Grid,
         folder: pathlib.Path,
-        played: set[tuple[int, int]] | None = None,
     ) -> None:
 
-        played = played or set()  # makes sure played is not None
+        fig = self.to_image()
 
-        for x, y in self.g:
+        fig.savefig(folder / "grid.png")
+
+    def to_image(
+        self: Grid,
+    ) -> matplotlib.figure.Figure:
+
+        plt.figure()
+        plt.axis("off")
+
+        plt.gca().set_aspect("equal", adjustable="box")
+
+        plt.plot(0, 0, "k.", markersize=1)
+
+        for x, y in self.played:
+            plt.gca().add_patch(matplotlib.patches.Rectangle((x, y), 1, 1, color="red", fill=True))
+
+        for x, y in self.empties:
+            plt.gca().add_patch(matplotlib.patches.Rectangle((x, y), 1, 1, color="blue", fill=True))
+
+        for x, y in self.board:
             plt.gca().add_patch(matplotlib.patches.Rectangle((x, y), 1, 1, fill=None))
 
-        # zip(*self.g) is a tuple of two lists (x, y)
-        plt.scatter(*zip(*self.g.keys()))  # type: ignore[arg-type]
+        return plt.gcf()
 
-        plt.savefig(folder / "grid.png")
+    def __copy__(
+        self: Grid,
+    ) -> Grid:
+
+        grid = Grid.__new__(Grid)
+        grid.board = self.board.copy()
+        grid.width = self.width
+        grid.height = self.height
+        grid.empties = self.empties.copy()
+        grid.played = self.played.copy()
+
+        return grid
+
+    def __deepcopy__(
+        self: Grid,
+        memo: dict[int, Grid],
+    ) -> Grid:
+
+        grid = Grid.__new__(Grid)
+        memo[id(self)] = grid
+
+        grid.board = self.board.copy()
+        grid.width = self.width
+        grid.height = self.height
+        grid.empties = self.empties.copy()
+        grid.played = self.played.copy()
+
+        return grid

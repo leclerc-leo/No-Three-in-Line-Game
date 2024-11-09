@@ -121,4 +121,4 @@ dependency-check:  ## check the dependencies
 precommit: fmt lint typecheck dependency-check  ## Run all precommit checks
 
 .PHONY: premerge
-premerge: precommit test coverage module-test ## Run all premerge checks
+premerge: precommit coverage test module-test ## Run all premerge checks

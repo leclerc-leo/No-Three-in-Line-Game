@@ -1,38 +1,73 @@
 from __future__ import annotations
 
+import collections
 import functools
-import itertools
+import math
 
-# _is_on_same_line and get_three_in_line are inspied by the following code:
-# Inspired by https://github.com/vjdad4m/no3inline/blob/main/no3inline/find_3_in_line.cu
+LIMIT = 2
+"""int: Number of points on the same line before to be consided a 3 in line.
 
+3 - 1 = 2
 
-@functools.lru_cache(maxsize=None)
-def _is_on_same_line(
-    x: tuple[int, int],
-    y: tuple[int, int],
-    z: tuple[int, int],
-) -> bool:
-    # Check if three points are on the same line by computing cross-products
-    return (x[0] - y[0]) * (x[1] - z[1]) == (x[0] - z[0]) * (x[1] - y[1])
+DO NOT CHANGE THIS VALUE, the program is not designed to handle other values.
+"""
 
 
-def get_three_in_line(
+@functools.lru_cache(None)
+def normalized_slope_intercept(
+    x1: int,
+    y1: int,
+    x2: int,
+    y2: int,
+) -> tuple[tuple[int, int], tuple[int, int]]:
+    """Calculate the normalized slope and intercept between
+    two points (x1, y1) and (x2, y2).
+    """
+
+    dx, dy = x2 - x1, y2 - y1
+
+    if dx == 0:  # Vertical line
+        slope = (1, 0)
+        intercept = (x1, 0)
+
+    elif dy == 0:  # Horizontal line
+        slope = (0, 1)
+        intercept = (0, y1)
+
+    else:
+        # Normalize slope
+        divisor = math.gcd(dx, dy)
+        normalized_dy, normalized_dx = dy // divisor, dx // divisor
+        slope = (normalized_dy, normalized_dx)
+
+        # Calculate intercept as a multiple of the slope
+        intercept_value = y1 * normalized_dx - x1 * normalized_dy
+        intercept = (intercept_value, normalized_dx)
+
+    return slope, intercept
+
+
+def has_three_in_line(
     played: set[tuple[int, int]],
-    board: set[tuple[int, int]] | None = None,
-) -> list[set[tuple[int, int]]]:
+    *,
+    lines: dict[tuple[tuple[int, int], tuple[int, int]], int] | None = None,
+    done: set[tuple[int, int]] | None = None,
+) -> bool:
 
-    # Maybe possible to use the board to optimize the function
-    board = board or set()
+    lines = lines or collections.defaultdict(int)
+    done = done or set()  # Avoid to check the same pair twice, this would make lines count wrong
 
-    results: list[set[tuple[int, int]]] = []
+    # Check each point as the origin point to compare others
+    for p1 in played:
+        done.add(p1)
 
-    # Use set to ensure unique combinations of 3 points
-    for comb in set(itertools.combinations(played, 3)):
+        for p2 in played - done:
 
-        # Check if these three points are on the same line
-        if _is_on_same_line(*comb):
+            slope, intercept = normalized_slope_intercept(*p1, *p2)
+            lines[(slope, intercept)] += 1
 
-            results.append(set(comb))  # noqa: PERF401
+            if lines[(slope, intercept)] >= LIMIT:
+                # If we find two other points on the same line with p1
+                return True
 
-    return results
+    return False

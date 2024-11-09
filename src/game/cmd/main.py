@@ -36,15 +36,12 @@ def main() -> int:
         [False, False, False, True, False, True],
         [False, True, True, False, False, False],
     ]
-    played_pos = {(i, j) for i, row in enumerate(played_matrix) for j, val in enumerate(row) if val}
+
+    played = {(i, j) for i, row in enumerate(played_matrix) for j, val in enumerate(row) if val}
 
     logging.info(
         "3 alignes : %s",
-        str(
-            rules.get_three_in_line(
-                played_pos,
-            ),
-        ),
+        str(rules.has_three_in_line(played)),
     )
 
     return 0

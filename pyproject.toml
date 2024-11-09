@@ -46,6 +46,7 @@ pytest-sugar = "^1.0.0"
 ruff = "^0.4.1"
 deptry = "^0.16.2"
 pytest-cov = "^6.0.0"
+ipykernel = "^6.29.5"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
