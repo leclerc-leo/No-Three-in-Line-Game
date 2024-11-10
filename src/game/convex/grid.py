@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 if TYPE_CHECKING:
     import pathlib
 
+    from game.players import player
+
 
 def _create(
     instructions: list[tuple[int, int]],
@@ -68,6 +70,8 @@ class Grid:
         self.empties = self.board.copy()
         self.played: set[tuple[int, int]] = set()
 
+        self.players: set[player.Player] = set()
+
     def play(
         self: Grid,
         x: int,
@@ -94,6 +98,40 @@ class Grid:
 
         fig.savefig(folder / "grid.png")
 
+    def get_positions(
+        self: Grid,
+        slope: tuple[int, int],
+        intercept: tuple[int, int],
+    ) -> set[tuple[int, int]]:
+
+        if intercept[1] == 0 and slope == (1, 0):  # Vertical line
+            return {
+                (intercept[0], y) for y in range(self.height) if (intercept[0], y) in self.board
+            }
+
+        if intercept[0] == 0 and slope == (0, 1):  # Horizontal line
+            return {(x, intercept[1]) for x in range(self.width) if (x, intercept[1]) in self.board}
+
+        intercept_value, x_offset = intercept
+        normalized_dx, normalized_dy = slope
+
+        # find the first point that is on the line
+        x = x_offset
+        y = (intercept_value + x * normalized_dy) // normalized_dx
+
+        positions = set()
+
+        # possible to optimize since we know the dimension of the board
+        while 0 <= x < self.width:
+
+            if (x, y) in self.board:
+                positions.add((x, y))
+
+            x += normalized_dx
+            y += normalized_dy
+
+        return positions
+
     def to_image(
         self: Grid,
     ) -> matplotlib.figure.Figure:
@@ -105,42 +143,20 @@ class Grid:
 
         plt.plot(0, 0, "k.", markersize=1)
 
-        for x, y in self.played:
-            plt.gca().add_patch(matplotlib.patches.Rectangle((x, y), 1, 1, color="red", fill=True))
+        for player in self.players:
+            colors = ["red", "green", "blue", "purple", "orange", "pink", "brown"]
 
-        for x, y in self.empties:
-            plt.gca().add_patch(matplotlib.patches.Rectangle((x, y), 1, 1, color="blue", fill=True))
+            for x, y in player.played:
+                plt.gca().add_patch(
+                    matplotlib.patches.Circle(
+                        (x + 0.5, y + 0.5),
+                        0.4,
+                        color=colors[player.id % len(colors)],
+                        fill=True,
+                    ),
+                )
 
         for x, y in self.board:
             plt.gca().add_patch(matplotlib.patches.Rectangle((x, y), 1, 1, fill=None))
 
         return plt.gcf()
-
-    def __copy__(
-        self: Grid,
-    ) -> Grid:
-
-        grid = Grid.__new__(Grid)
-        grid.board = self.board.copy()
-        grid.width = self.width
-        grid.height = self.height
-        grid.empties = self.empties.copy()
-        grid.played = self.played.copy()
-
-        return grid
-
-    def __deepcopy__(
-        self: Grid,
-        memo: dict[int, Grid],
-    ) -> Grid:
-
-        grid = Grid.__new__(Grid)
-        memo[id(self)] = grid
-
-        grid.board = self.board.copy()
-        grid.width = self.width
-        grid.height = self.height
-        grid.empties = self.empties.copy()
-        grid.played = self.played.copy()
-
-        return grid

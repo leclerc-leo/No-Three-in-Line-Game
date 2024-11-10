@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import secrets
-from typing import TYPE_CHECKING, Callable
+import collections
+import random
+from typing import TYPE_CHECKING, Callable, Literal, TypeVar
 
 from game.players import player
 
@@ -9,72 +10,59 @@ if TYPE_CHECKING:
     from game.convex import grid
 
 
-def _level_one(
-    g: grid.Grid,
-    _player: Heuristic,
-) -> tuple[int, int]:
-
-    return secrets.choice(tuple(g.empties))
+T = TypeVar("T")
 
 
-def _level_two(
-    g: grid.Grid,
+def _choice(s: set[T]) -> T:
+    return random.choice(tuple(s))  # noqa: S311 NOSONAR - to allow for seeds
+
+
+def _choose_zero(
     player: Heuristic,
 ) -> tuple[int, int]:
 
-    filtered = player.empties
+    if player.availables:
+        return _choice(player.availables)
 
-    # if there are no empty positions left, we fallback to the previous heuristic
-    return secrets.choice(tuple(filtered)) if filtered else _level_one(g, player)
+    if player.grid.empties:
+        return _choice(player.grid.empties)
+
+    msg = "Trying to choose from a grid that is full or has no spots."
+    raise ValueError(msg)
 
 
-def _level_three(
-    g: grid.Grid,
+def _choice_one(
     player: Heuristic,
 ) -> tuple[int, int]:
 
-    # To be implemented later, same as level two but with diagonals
+    if player.availables:
 
-    return _level_two(g, player)
+        # try to select a spot where is there is less spots in it's row or column
+        rows: collections.Counter[int] = collections.Counter()
+        cols: collections.Counter[int] = collections.Counter()
 
+        for x, y in player.availables:
+            rows[x] += 1
+            cols[y] += 1
 
-def _level_four(
-    g: grid.Grid,
-    player: Heuristic,
-) -> tuple[int, int]:
+        row = rows.most_common()[::-1][0]
+        col = cols.most_common()[::-1][0]
 
-    picked: tuple[int, int] | None = None
+        if row[1] == col[1] and (row[0], col[0]) in player.availables:
+            return row[0], col[0]
 
-    while picked is None and player.empties:
-        # retrieve in O(n) a random element from a set
-        # Improvement in O(1) doesn't seems to be possible in python using sets
-        picked = secrets.choice(tuple(player.empties))
+        if row[1] < col[1]:
+            return _choice({(x, y) for x, y in player.availables if x == row[0]})
 
-        # If the picked position does not create a 3 in line, we return it
-        if not player.has_three_in_line(picked):
-            return picked
+        return _choice({(x, y) for x, y in player.availables if y == col[0]})
 
-        picked = None
-
-    return _level_three(g, player)
+    return _choose_zero(player)
 
 
-def _level_five(
-    g: grid.Grid,
-    player: Heuristic,
-) -> tuple[int, int]:
-
-    # To be implemented later, same as level four but with tries to block the opponent
-
-    return _level_four(g, player)
-
-
-_int_to_level_func: dict[int, Callable[[grid.Grid, Heuristic], tuple[int, int]]] = {
-    1: _level_one,
-    2: _level_two,
-    3: _level_three,
-    4: _level_four,
-    5: _level_five,
+LevelChoose = Literal[0, 1]
+_int_to_choose_func: dict[LevelChoose, Callable[[Heuristic], tuple[int, int]]] = {
+    0: _choose_zero,
+    1: _choice_one,
 }
 """a dict that maps level to the corresponding function
 
@@ -85,18 +73,89 @@ or higher if there is a lot of players)
 """
 
 
+def _available_zero(
+    _player: Heuristic,
+    _slope: tuple[int, int],
+    _intercept: tuple[int, int],
+) -> None:
+    """All spots on the grid except those played are available to choose from.
+
+    !!! note
+        Those spots might not be valid moves.
+    """
+
+
+def _available_one(
+    player: Heuristic,
+    slope: tuple[int, int],
+    intercept: tuple[int, int],
+) -> None:
+
+    if slope[0] == 0 or slope[1] == 0:
+        player.availables -= player.grid.get_positions(slope, intercept)
+
+
+def _available_two(
+    player: Heuristic,
+    slope: tuple[int, int],
+    intercept: tuple[int, int],
+) -> None:
+
+    _available_one(player, slope, intercept)
+
+    if abs(slope[0]) == 1 and abs(slope[1]) == 1:
+        player.availables -= player.grid.get_positions(slope, intercept)
+
+
+def _available_three(
+    player: Heuristic,
+    slope: tuple[int, int],
+    intercept: tuple[int, int],
+) -> None:
+
+    player.availables -= player.grid.get_positions(slope, intercept)
+
+
+LevelAvailable = Literal[0, 1, 2, 3]
+_int_to_available_func: dict[
+    LevelAvailable,
+    Callable[
+        [
+            Heuristic,
+            tuple[int, int],
+            tuple[int, int],
+        ],
+        None,
+    ],
+] = {
+    0: _available_zero,
+    1: _available_one,
+    2: _available_two,
+    3: _available_three,
+}
+
+
 class Heuristic(player.Player):
 
-    def __init__(self: Heuristic, g: grid.Grid, level: int) -> None:
-
-        if level not in _int_to_level_func:
-            msg = f"level must be in {set(_int_to_level_func.keys())}."
-            raise ValueError(msg)
+    def __init__(
+        self: Heuristic,
+        g: grid.Grid,
+        level_choosing: LevelChoose,
+        level_available: LevelAvailable,
+    ) -> None:
 
         super().__init__(g)
 
-        self._level = level
+        self._choosing: LevelChoose = level_choosing
+        self._available: LevelAvailable = level_available
 
     def _choose(self: Heuristic) -> tuple[int, int]:
+        return _int_to_choose_func[self._choosing](self)
 
-        return _int_to_level_func[self._level](self._grid, self)
+    def _update_availables(
+        self: Heuristic,
+        slope: tuple[int, int],
+        intercept: tuple[int, int],
+    ) -> None:
+
+        _int_to_available_func[self._available](self, slope, intercept)

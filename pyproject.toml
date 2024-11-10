@@ -62,7 +62,7 @@ folders = [
 ]
 
 [tool.poetry.scripts]
-main = "game.cmd.main:main"
+# main = "game.cmd.main:main"
 
 #
 # Tools

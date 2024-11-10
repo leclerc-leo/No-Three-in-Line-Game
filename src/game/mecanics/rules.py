@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import collections
-import functools
 import math
 
 LIMIT = 2
@@ -13,7 +12,7 @@ DO NOT CHANGE THIS VALUE, the program is not designed to handle other values.
 """
 
 
-@functools.lru_cache(None)
+# @functools.lru_cache(None)
 def normalized_slope_intercept(
     x1: int,
     y1: int,
@@ -23,6 +22,9 @@ def normalized_slope_intercept(
     """Calculate the normalized slope and intercept between
     two points (x1, y1) and (x2, y2).
     """
+
+    if x2 < x1:
+        x1, y1, x2, y2 = x2, y2, x1, y1
 
     dx, dy = x2 - x1, y2 - y1
 
@@ -38,11 +40,12 @@ def normalized_slope_intercept(
         # Normalize slope
         divisor = math.gcd(dx, dy)
         normalized_dy, normalized_dx = dy // divisor, dx // divisor
-        slope = (normalized_dy, normalized_dx)
+        slope = (normalized_dx, normalized_dy)
 
         # Calculate intercept as a multiple of the slope
         intercept_value = y1 * normalized_dx - x1 * normalized_dy
-        intercept = (intercept_value, normalized_dx)
+        x_offset = x1 % normalized_dx
+        intercept = (intercept_value, x_offset)
 
     return slope, intercept
 
