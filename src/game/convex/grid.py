@@ -12,6 +12,34 @@ if TYPE_CHECKING:
     from game.players import player
 
 
+def get_positions(
+    height: int,
+    width: int,
+    slope: tuple[int, int],
+    intercept: tuple[int, int],
+) -> set[tuple[int, int]]:
+
+    result = set()
+
+    if intercept[1] == 0 and slope == (1, 0):  # Vertical line
+        for i in range(height):
+            result.add((intercept[0], i))
+        return result
+
+    if intercept[0] == 0 and slope == (0, 1):  # Horizontal line
+        for i in range(width):
+            result.add((i, intercept[1]))
+        return result
+
+    intercept_value, x_offset = intercept
+    normalized_dx, normalized_dy = slope
+
+    for i in range(x_offset, width, normalized_dx):
+        result.add((i, (intercept_value + i * normalized_dy) // normalized_dx))
+
+    return result
+
+
 def _create(
     instructions: list[tuple[int, int]],
 ) -> set[tuple[int, int]]:
@@ -103,34 +131,7 @@ class Grid:
         slope: tuple[int, int],
         intercept: tuple[int, int],
     ) -> set[tuple[int, int]]:
-
-        if intercept[1] == 0 and slope == (1, 0):  # Vertical line
-            return {
-                (intercept[0], y) for y in range(self.height) if (intercept[0], y) in self.board
-            }
-
-        if intercept[0] == 0 and slope == (0, 1):  # Horizontal line
-            return {(x, intercept[1]) for x in range(self.width) if (x, intercept[1]) in self.board}
-
-        intercept_value, x_offset = intercept
-        normalized_dx, normalized_dy = slope
-
-        # find the first point that is on the line
-        x = x_offset
-        y = (intercept_value + x * normalized_dy) // normalized_dx
-
-        positions = set()
-
-        # possible to optimize since we know the dimension of the board
-        while 0 <= x < self.width:
-
-            if (x, y) in self.board:
-                positions.add((x, y))
-
-            x += normalized_dx
-            y += normalized_dy
-
-        return positions
+        return get_positions(self.height, self.width, slope, intercept)
 
     def to_image(
         self: Grid,

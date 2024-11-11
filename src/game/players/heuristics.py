@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import collections
 import random
 from typing import TYPE_CHECKING, Callable, Literal, TypeVar
 
@@ -37,24 +36,24 @@ def _choice_one(
 
     if player.availables:
 
-        # try to select a spot where is there is less spots in it's row or column
-        rows: collections.Counter[int] = collections.Counter()
-        cols: collections.Counter[int] = collections.Counter()
+        center = (player.grid.width // 2, player.grid.height // 2)
 
-        for x, y in player.availables:
-            rows[x] += 1
-            cols[y] += 1
+        bests = set()
+        best_score = -1
 
-        row = rows.most_common()[::-1][0]
-        col = cols.most_common()[::-1][0]
+        for pos in player.availables:
+            score = sum(
+                abs(pos[0] - p[0]) + abs(pos[1] - p[1]) for p in player.played.union({center})
+            )
 
-        if row[1] == col[1] and (row[0], col[0]) in player.availables:
-            return row[0], col[0]
+            if score > best_score:
+                bests = {pos}
+                best_score = score
 
-        if row[1] < col[1]:
-            return _choice({(x, y) for x, y in player.availables if x == row[0]})
+            elif score == best_score:
+                bests.add(pos)
 
-        return _choice({(x, y) for x, y in player.availables if y == col[0]})
+        return _choice(bests)
 
     return _choose_zero(player)
 

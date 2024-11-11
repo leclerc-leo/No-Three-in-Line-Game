@@ -72,7 +72,10 @@ class Player(abc.ABC):
     def has_three_in_line(self: Player, new_pos: tuple[int, int]) -> bool:
         return new_pos not in self._allowed
 
-    def play(self: Player) -> tuple[int, int] | Literal[False]:
+    def play(
+        self: Player,
+        choice: tuple[int, int] | None = None,
+    ) -> tuple[int, int] | Literal[False]:
         """Play a move on the grid.
 
         !!! warning
@@ -92,7 +95,8 @@ class Player(abc.ABC):
         self.availables -= self.grid.played
         self._allowed -= self.grid.played
 
-        choice = self._choose()
+        if choice is None:
+            choice = self._choose()
 
         self._add_new_pos(choice)
         if self._busted:
