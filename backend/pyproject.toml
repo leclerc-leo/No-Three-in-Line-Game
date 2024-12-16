@@ -1,0 +1,152 @@
+#
+# Build
+#
+
+[tool.poetry]
+name = "no_three_in_line_game"
+version = "0.0.0" # manage by poetry-dynamic-versioning plugin
+description = ""
+homepage = "https://github.com/leclerc-leo/No-Three-in-Line-Game"
+authors = ["LECLERC Léo <leo@leclerc.dev>"]
+readme = "README.md"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+]
+keywords = ["Game", "Mojette"]
+repository = "https://github.com/leclerc-leo/No-Three-in-Line-Games"
+packages = [
+    {include = "game", from = "src"},
+    {include = "tests"},
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/leclerc-leo/No-Three-in-Line-Game"
+
+[tool.poetry.dependencies]
+python = ">=3.10, <3.13"
+matplotlib = "^3.9.2"
+flask = "^3.1.0"
+flask-socketio = "^5.4.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.0"
+coverage = "^7.4.4"
+mypy = "^1.9.0"
+pytest = "^8.1.1"
+pytest-sugar = "^1.0.0"
+ruff = "^0.4.1"
+deptry = "^0.16.2"
+pytest-cov = "^6.0.0"
+ipykernel = "^6.29.5"
+types-flask-socketio = "^5.4.0.20241002"
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+
+[tool.poetry-dynamic-versioning.substitution]
+files = ["game/_version.py"]
+folders = [
+  { path = "src" }
+]
+
+[tool.poetry.scripts]
+# main = "game.cmd.main:main"
+
+#
+# Tools
+#Jp
+
+[tool.ruff]
+line-length = 100
+exclude = [
+#    "vendor/*" # for the librairies
+]
+
+[tool.ruff.lint]
+ignore = ["D", "TD003", "TD002"]
+select = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",    # assert in tests
+    "S603",    # unchecked subprocess calls in tests
+    "S607",    # unchecked subprocess calls in tests
+    "PLR2004", # magic numbers in tests
+    "SLF001",  # tests can access private members
+]
+
+[tool.black]
+line-length = 100
+
+[tool.coverage.run]
+# Use source_pkgs instead of include to also list uncovered files
+source_pkgs = ["src/game", "game"]
+relative_files = true
+omit = [
+    "tests/*",
+    "venv/*",
+    ".venv/*",
+    "*/virtualenvs/*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "raise NotImplementedError",  # for abstract method to not be checked
+    "if TYPE_CHECKING:", # for type hinting
+]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+force_sort_within_sections = true
+
+[tool.mypy]
+python_version = "3.9"
+platform = "linux"
+mypy_path = "src"
+namespace_packages = true
+explicit_package_bases = true
+check_untyped_defs = true
+ignore_missing_imports = true
+
+disallow_any_generics = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+no_implicit_reexport = true
+show_error_codes = true
+strict_equality = true
+strict_optional = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+log_format = "%(asctime)s {%(pathname)s:%(lineno)d} %(levelname)s %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
+testpaths = [
+    "tests/unit",
+    "tests/module",
+]
+
+[tool.deptry.per_rule_ignores]
+

@@ -8,7 +8,7 @@
         "source.organizeImports.ruff": "always"
     }
   },
-  "python.defaultInterpreterPath": "./.venv/bin/python",
+  "python.defaultInterpreterPath": "./backend/.venv/bin/python",
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "mypy.enabled": true,
@@ -16,19 +16,27 @@
   "python.analysis.typeCheckingMode": "standard",
   "files.exclude": {
     "LICENSE": true,
-    "poetry.lock": true,
-    "**/__py**": true,
-    "setup.py": true,
+    "backend/poetry.lock": true,
+    "backend/**/__py**": true,
+    "backend/setup.py": true,
     "sonar-project.properties": true,
-    "*.xml": true,
-    "Makefile": true,
-    "pyproject.toml": true,
-    "**/py.typed": true,
-    "mkdocs.yml": true,
-    "**/__pycache__": true,
-    "**/__init__.py": true,
-    "poetry.toml": true,
+    "backend/*.xml": true,
+    "backend/Makefile": true,
+    "backend/pyproject.toml": true,
+    "backend/**/py.typed": true,
+    "backend/mkdocs.yml": true,
+    "backend/**/__pycache__": true,
+    "backend/**/__init__.py": true,
+    "backend/poetry.toml": true,
     "**/.*": true,
+    "frontend/node_modules": true,
+    "frontend/package.json": true,
+    "frontend/package-lock.json": true,
+    "frontend/tsconfig*": true,
+    "frontend/eslint.config.mjs": true,
+    "frontend/.prettierrc.js": true,
+    "frontend/tslint.json": true,
+    "frontend/angular.json": true,
   },
   "python.testing.pytestArgs": [
     "tests"
@@ -47,7 +55,7 @@
     "connectionId": "https-sonar-leclerc-dev-",
     "projectKey": "pas_3_alignes"
   },
-  "sonarlint.analysisExcludesStandalone": "**/vendor/**",
+  "sonarlint.analysisExcludesStandalone": "backend/**/vendor/**,frontend/**",
   "sonarlint.testFilePattern": "test_*.py",
   "sonarlint.analyzerProperties": {
     "sonar.python.coverage.reportPaths": "coverage.xml"
@@ -61,4 +69,8 @@
     "minimap.background": "#00000000",
     "scrollbar.shadow": "#00000000"
   },
+  "eslint.workingDirectories": [
+    "./frontend"
+  ],
+  "testing.automaticallyOpenTestResults": "neverOpen"
 }

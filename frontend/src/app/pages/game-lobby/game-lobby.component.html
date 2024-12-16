@@ -1,0 +1,71 @@
+<div class="container-xl">
+
+  <div class="row text-center">
+    <div class="col">
+      <h1>Indentifiant de partie : {{ game_id }}</h1>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col-3 d-fleex align-items-stretch" *ngFor="let player of players;">
+      <div class="card w-100" *ngIf="player.type === -1">
+
+        <div class="card-body text-center">
+          <p>Waiting for player ... </p>
+        </div>
+      </div>
+
+      <div class="card w-100" *ngIf="player.type === 0">
+
+        <div class="card-body text-center">
+          <img src="/img/human.jpg" alt="Icon de profil" class="card-img-top" style="height: 100px; width: 100px;">
+
+          <p *ngIf="player.id !== player_id; else not_you">You</p>
+          <ng-template #not_you>
+            <p>Player {{ player.id }}</p>
+          </ng-template>
+        </div>
+
+        <div class="card-footer text-center" *ngIf="player.id !== player_id">
+          <button class="btn btn-danger" (click)="removePlayer(player)">Remove</button>
+        </div>
+      </div>
+
+      <div class="card w-100" *ngIf="player.type === 1">
+
+
+        <div class="card-body text-center">
+          <img src="/img/robot.png" alt="Icon de profil" class="card-img-top" style="height: 100px; width: 100px;">
+
+          <p>Ordinateur Niv.{{ player.hlvl }}</p>
+        </div>
+
+        <div class="card-footer text-center">
+          <button class="btn btn-danger" (click)="removePlayer(player)">Remove</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row justify-content-center" style="margin-top:50px;">
+
+    <div class="col-3 align-items-stretch text-center">
+      <label for="heuristicSelect">Niveau :</label>
+      <select id="heuristicSelect" [(ngModel)]="selectedHeuristic">
+        <option *ngFor="let heuristic of heuristics" [value]="heuristic">{{ heuristic }}</option>
+      </select>
+      <button class="btn btn-secondary" (click)="addHeuristic()">Ajouter Ordinateur</button>
+    </div>
+
+    <div class="col-3 align-items-stretch text-center">
+      <button class="btn btn-primary" (click)="startGame()"
+        [disabled]="canCreateGame">
+        Lancer la partie
+      </button>
+    </div>
+
+  </div>
+
+</div>
