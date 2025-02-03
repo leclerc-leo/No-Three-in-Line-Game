@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import pathlib
 import random
 from typing import Literal
 
@@ -62,7 +64,32 @@ games: dict[int, tuple[grid.Grid, list[player.Player], int, int]] = {}
     - the current player index
     - the current turn start time (in milliseconds, to be used for timeouts)
 """
+solo_games: dict[int, tuple[str, int]] = {}
+
 client_to_game: dict[str, int] = {}
+
+puzzles_games: dict[str, list[list[tuple[int, int]]]] = {}
+with (pathlib.Path(__file__).parent / "puzzles.json").open() as f:
+    p_data = json.load(f)
+    """
+    The puzzles data is a dictionary with the following structure:
+    {
+        "Facile": [ # difficulty
+            [(x, y), (x, y), ...], # puzzles
+            ...
+        ],
+        "Moyen": [
+            ...
+        ],
+        "Difficile": [
+            ...
+        ]
+    }
+    """
+
+    puzzles_games = {dif: [list(puzzles[1:]) for puzzles in p_data[dif]] for dif in p_data}
+
+puzzles_completions: dict[str, dict[str, list[list[tuple[int, int]]]]] = {}
 
 heuristics_levels: dict[int, tuple[Literal[0, 1], Literal[3]]] = {
     0: (0, 3),
@@ -148,11 +175,48 @@ def start_game(lobby_id: int) -> None:
     )
 
 
+def end_solo(lobby_id: int) -> None:
+
+    difficulty, dif_index = solo_games.pop(lobby_id)
+    puzzle_grid, [player], _, _ = games.pop(lobby_id)
+
+    if difficulty not in puzzles_completions[player.id]:
+        puzzles_completions[player.id][difficulty] = []
+
+    if dif_index >= len(puzzles_completions[player.id][difficulty]):
+        puzzles_completions[player.id][difficulty].append([])
+
+    completion = puzzles_completions[player.id][difficulty][dif_index]
+
+    if len(completion) < len(player.played):
+        puzzles_completions[player.id][difficulty][dif_index] = list(player.played)
+
+    socketio.emit(
+        "game:solo_end",
+        {
+            "best_score": len(completion),
+            "score": len(player.played),
+            "completions": puzzles_completions[player.id],
+            "board": puzzle_grid.toJSON(),
+        },
+        to=str(lobby_id),
+    )
+
+    flask_socketio.leave_room(str(lobby_id))
+
+
 @socketio.on("game:play")
 def play(lobby_id: int, x: int, y: int) -> None:
 
+    def handle_end() -> None:
+        if len(game[1]) == 1:
+            end_solo(lobby_id)
+
     # would be best later to have some king of private key to prevent
     # someone from playing in someone else's turn
+
+    if lobby_id not in games:
+        return
 
     game = games[lobby_id]
     current_player = game[1][game[2]]
@@ -163,15 +227,78 @@ def play(lobby_id: int, x: int, y: int) -> None:
     res = current_player.play((x, y))
 
     if not res:
+        # choose wrong square (shouldn't happen)
+        handle_end()
         return
 
     games[lobby_id] = (game[0], game[1], (game[2] + 1) % len(game[1]), -1)
 
+    if len(current_player.allowed) == 0:
+        # player has no more moves
+        handle_end()
+        return
+
     socketio.emit(
         "game:update",
-        game[0].toJSON(),
+        {
+            "board": game[0].toJSON(),
+            "allowed": list(current_player.allowed),
+        },
         to=str(lobby_id),
     )
+
+
+@socketio.on("selection:puzzles")
+def puzzles(
+    client_id: str,
+    difficulty: str = "Facile",
+    index: int = 0,
+    competitif: bool = False,  # noqa: FBT002, FBT001
+) -> None:
+
+    play_grid = grid.Grid(puzzles_games[difficulty][index])
+
+    lobby_id = int(abs(hash(str(puzzles_completions) + str(client_id)) // 1e9))
+    lobbies[lobby_id] = [(HUMAN, client_id, None)]
+
+    p = Human(client_id, play_grid)
+    games[lobby_id] = (play_grid, [p], 0, -1)
+    solo_games[lobby_id] = (difficulty, index)
+
+    if client_id not in puzzles_completions:
+        puzzles_completions[client_id] = {
+            dif: [[] for _ in puzzles_games[dif]] for dif in puzzles_games
+        }
+
+    if not competitif:
+        for _ in range(4):
+            p.play(random.choice(list(p.allowed)))  # noqa: S311
+
+    socketio.emit(
+        "selection:puzzles",
+        {
+            "game_id": lobby_id,
+            "board": play_grid.toJSON(),
+            "completions": puzzles_completions[client_id],
+            "allowed": list(p.allowed),
+            "puzzle": {"difficulty": difficulty, "index": index},
+        },
+    )
+
+    flask_socketio.join_room(str(lobby_id))
+
+
+@socketio.on("game:leave")
+def leave(lobby_id: int) -> None:
+
+    if lobby_id in games:
+        games.pop(lobby_id)
+    if lobby_id in solo_games:
+        solo_games.pop(lobby_id)
+    if lobby_id in lobbies:
+        lobbies.pop(lobby_id)
+
+    flask_socketio.leave_room(str(lobby_id))
 
 
 if __name__ == "__main__":

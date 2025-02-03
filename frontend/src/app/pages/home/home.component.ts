@@ -25,6 +25,31 @@ export class HomeComponent implements OnDestroy {
       this.game.availableHeuristics = game_infos.heuristics;
       this.router.navigate(['/game-lobby']);
     });
+
+    this.socket.registerEvent('selection:puzzles',
+      (game_infos: {
+        game_id: number,
+        board: [boolean, number, number, string[]][],
+        completions: {[dif: string]: [number, number][][],},
+        allowed: [number, number][],
+        puzzle: {difficulty: string, index: number},
+      }) =>
+      {
+        this.game.game_id = game_infos.game_id;
+        this.game.board = game_infos.board;
+        this.game.allowed[localService.getPlayerId()] = game_infos.allowed;
+        this.game.completions = game_infos.completions;
+        this.game.puzzle = game_infos.puzzle;
+        console.log(this.game.completions);
+
+        this.game.player_to_id = {
+          [localService.getPlayerId()]: 0,
+        };
+        this.game.players = [[0, localService.getPlayerId(), null]];
+
+        this.router.navigate(['/puzzles']);
+      }
+    );
   }
 
   createGame() {
@@ -41,5 +66,13 @@ export class HomeComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.socket.unregisterEvent('selection:game_created');
+    this.socket.unregisterEvent('selection:puzzles');
+  }
+
+  puzzles(): void {
+    this.socket.emit(
+      'selection:puzzles',
+      localService.getPlayerId(),
+    );
   }
 }

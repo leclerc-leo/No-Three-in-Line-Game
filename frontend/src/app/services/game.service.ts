@@ -11,8 +11,11 @@ export class gameService {
   public board: [boolean, number, number, string[]][] = [];
   public players: [0 | 1, string, number | null][] = [];
   public turn: number = 0;
+  public completions: { [dif: string]: [number, number][][] } = {};
 
   public player_to_id: { [player: string]: number } = {};
+  public allowed: {[id : string]: [number, number][]} = {};
+  public puzzle: {difficulty: string, index: number} = {difficulty: 'Facile', index: 0};
 
   constructor(
     private router: Router,
@@ -23,6 +26,15 @@ export class gameService {
 
   public getPlayerId(player: string): number {
     return this.player_to_id[player];
+  }
+
+  public reset(): void {
+    this.game_id = -1;
+    this.availableHeuristics = [];
+    this.board = [];
+    this.players = [];
+    this.turn = 0;
+    this.player_to_id = {};
   }
 
 }

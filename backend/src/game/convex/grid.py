@@ -164,6 +164,7 @@ class Grid:
 
     def toJSON(self: Grid) -> list[tuple[bool, int, int, list[str]]]:  # noqa: N802
 
+        # players shouldn't be able to play the same position so shouldn't be an issue
         played = [(True, *pos, [player.id]) for player in self.players for pos in player.played]
 
         allowed = [

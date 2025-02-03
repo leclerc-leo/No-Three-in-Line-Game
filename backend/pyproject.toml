@@ -38,6 +38,7 @@ python = ">=3.10, <3.13"
 matplotlib = "^3.9.2"
 flask = "^3.1.0"
 flask-socketio = "^5.4.1"
+ipykernel = "^6.29.5"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.0"
