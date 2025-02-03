@@ -1,0 +1,43 @@
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.grid div {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.grid .cell {
+  height: 40px;
+  width: 40px;
+  border: 1px solid #fff;
+  margin: 0;
+  padding: 0;
+}
+
+.grid .cell.hidden {
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+
+.player-0 {
+  background-color: #f542e9;
+}
+
+.player-1 {
+  background-color: #4260f5;
+}
+
+.player-2 {
+  background-color: #f00;
+}
+
+.player-3 {
+  background-color: #0f0;
+}

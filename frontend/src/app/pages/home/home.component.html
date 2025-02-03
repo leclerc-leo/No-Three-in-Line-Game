@@ -1,0 +1,60 @@
+<div class="container-xl">
+
+  <div class="row text-center">
+    <div class="col">
+      <h1> Bienvenue sur le jeu du 3 pas alignés </h1>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col-4 d-flex align-items-stretch">
+      <div class="card w-100">
+
+        <div class="card-header text-center">Rejoindre une partie</div>
+        <div class="card-body d-flex flex-column">
+          <p class="card-text">Entrez ci-dessous l'identifiant de la partie pour la rejoindre</p>
+          <input type="number" placeholder="Identifiant" id="gameId">
+        </div>
+        <div class="card-footer text-body-secondary text-center">
+          <button class="btn btn-primary w-50" (click)="joinGame()" disabled>Rejoindre</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-4 d-flex align-items-stretch">
+      <div class="card w-100">
+
+        <div class="card-header text-center">Créer une partie</div>
+        <div class="card-body d-flex flex-column">
+        </div>
+        <div class="card-footer text-body-secondary text-center">
+          <button class="btn btn-primary w-50" (click)="createGame()" disabled>Créer</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-4 d-flex align-items-stretch">
+      <div class="card w-100">
+
+        <div class="card-header text-center">Jouer aux puzzles</div>
+        <div class="card-body d-flex flex-column">
+        </div>
+        <div class="card-footer text-body-secondary text-center">
+          <button class="btn btn-primary w-50" (click)="puzzles()">Jouer</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row align-items-center" style="margin-top:50px;">
+    <div class="col text-center">
+      <a href="#">Est ce votre premiere fois ? Decouvrez le tutoriel en cliquant ici</a>
+    </div>
+  </div>
+
+</div>

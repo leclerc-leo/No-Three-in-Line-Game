@@ -1,0 +1,40 @@
+<div class="container-xl">
+
+  <div class="row">
+
+    <div class="col-6 d-flex align-items-stretch">
+      <div class="card w-100">
+
+        <div class="card-body d-flex flex-column">
+
+          <div class="grid">
+            <div *ngFor="let i of [].constructor(board_height); let x = index">
+              <div *ngFor="let j of [].constructor(board_width); let y = index">
+
+                <div class="cell"
+                     [ngClass]="[
+                      {
+                        'false': 'hidden',
+                        'true': '',
+                      }[inBoard([y, board_height - x - 1]).toString()],
+                      {
+                        'false': '',
+                        'true': 'played player-' + getCellPlayer([y, board_height - x - 1]).toString(),
+                      }[isPlayed([y, board_height - x - 1]).toString()],
+                     ]"
+                     (click)="play([y, board_height - x - 1])"
+                     [attr.data-x]="y"
+                     [attr.data-y]="board_height - x - 1"></div>
+
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
